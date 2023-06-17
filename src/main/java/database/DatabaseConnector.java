@@ -9,6 +9,11 @@ public class DatabaseConnector {
     private String password;
     private static String url ="jdbc:mysql://localhost:3306/db";
     private Connection connection;
+
+    public Connection getConnection() {
+        return connection;
+    }
+
     private String request;
     private ResultSet result;
 

@@ -7,34 +7,34 @@ import javax.xml.crypto.Data;
 
 public class User implements Data {
 
-    private Long id;
+    private Integer id;
     private String username;
     private String password;
-    private String email;
+    private String mail;
 
     // Default constructor
     public User() {
     }
 
     @JsonCreator
-    public User(@JsonProperty("username") String username, @JsonProperty("password") String password, @JsonProperty("email") String email) {
+    public User(@JsonProperty("username") String username, @JsonProperty("password") String password, @JsonProperty("mail") String mail) {
         this.username = username;
         this.password = password;
-        this.email = email;
+        this.mail = mail;
     }
 
-    public User(Long id, String username, String password, String email) {
+    public User(Integer id, String username, String password, String mail) {
         this.id = id;
         this.username = username;
         this.password = password;
-        this.email = email;
+        this.mail = mail;
     }
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -54,11 +54,11 @@ public class User implements Data {
         this.password = password;
     }
 
-    public String getEmail() {
-        return email;
+    public String getMail() {
+        return mail;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setMail(String mail) {
+        this.mail = mail;
     }
 }

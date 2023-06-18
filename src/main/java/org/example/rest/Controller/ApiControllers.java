@@ -48,33 +48,50 @@ public class ApiControllers {
 
         if (Strings.isNotBlank(user.getUsername())
                 && Strings.isNotBlank(user.getPassword())
-                && Strings.isNotBlank(user.getEmail())) {
-            if(handleRegistration(user)) {
-                System.out.println("OK");
+                && Strings.isNotBlank(user.getMail())) {
+            if(!isUsernameAlreadyTook(user)) {
+                if (handleRegistration(user)) {
+                    return ResponseEntity.ok("User successfully registered !");
+                }
             }
-        } else {
-            System.out.println("PAS OK");
-
+            return ResponseEntity.ok("Username is already took !");
         }
-
-        return ResponseEntity.ok("Data updated successfully");
+        return ResponseEntity.ok("An error was occured during registration !");
     }
 
     private boolean handleRegistration(User user) throws SQLException {
-        DatabaseConnector db = new DatabaseConnector("nicolas","Ficellejulien66!");
-
+        DatabaseConnector db = new DatabaseConnector();
         DSLContext context = DSL.using(db.getConnection(), SQLDialect.MYSQL);
-        InsertValuesStep4<Record,Object,Object,Object,Object> select = context
+        InsertValuesStep4<Record,Integer,String,String,String> insert = context
                 .insertInto(table("users"))
-                .columns(field("id"), field("username"), field("password"), field("mail"))
-                .values(null, user.getUsername(), user.getPassword(), user.getEmail());
-        db.setRequest(select.getSQL());
+                .columns(field("id",Integer.class), field("username",String.class), field("password",String.class), field("mail",String.class))
+                .values(1, user.getUsername(), user.getPassword(), user.getMail());
+
         db.connect();
-        ResultSet result = db.execute();
-        while(result.next()){
-            System.out.println(result.getString(1)+" "+result.getString(2));
-        }
+        db.setRequest(insert.getSQL());
+        int numberRowsInjected = db.executeRegister(user);
         db.close();
-        return true;
+
+        return numberRowsInjected == 1;
+    }
+
+    private boolean isUsernameAlreadyTook(User user) throws SQLException {
+        DatabaseConnector db = new DatabaseConnector();
+
+        DSLContext context = DSL.using(SQLDialect.MYSQL);
+        Table<Record> usersTable = table("users");
+        Field<String> usernameField = field("username", String.class);
+
+        SelectQuery<Record> selectQuery = context.selectQuery();
+        selectQuery.addFrom(usersTable);
+        selectQuery.addConditions(usernameField.eq(user.getUsername()));
+
+        selectQuery.execute();
+        db.connect();
+        db.setRequest(selectQuery.getSQL());
+        ResultSet result = db.verifyUsername(user);
+        db.close();
+
+        return result.wasNull();
     }
 }

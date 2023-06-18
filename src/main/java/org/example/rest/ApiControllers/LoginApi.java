@@ -28,6 +28,7 @@ public class LoginApi {
             if(compareHashedPassword(user)) {
                 return ResponseEntity.ok("You're logged in !");
             }
+            return ResponseEntity.ok("Wrong user or password !");
         }
         return ResponseEntity.ok("Fields empty !");
     }
@@ -53,6 +54,10 @@ public class LoginApi {
     }
 
     private boolean compareHashedPassword(User user) throws SQLException {
-        return BCrypt.checkpw(user.getPassword(),getHashedPasswordFromUsername(user));
+        String hashedPassword = getHashedPasswordFromUsername(user);
+            if (hashedPassword.isEmpty()) {
+                return false;
+            }
+        return BCrypt.checkpw(user.getPassword(),hashedPassword);
     }
 }

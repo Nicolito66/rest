@@ -1,81 +1,39 @@
 package database;
 
-import classes.User;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+import org.jooq.DSLContext;
+import org.jooq.SQLDialect;
+import org.jooq.impl.DSL;
 
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import org.mindrot.jbcrypt.BCrypt;
-
+import javax.sql.DataSource;
 
 public class DatabaseConnector {
+    private static String jdbcUrl = "jdbc:mysql://localhost:3306/db";
     private static String username = "nicolas";
     private static String password = "Ficellejulien66!";
-    private static String url = "jdbc:mysql://localhost:3306/db";
-    private Connection connection;
-
-    public Connection getConnection() {
-        return connection;
-    }
-
-    private String request;
-    private ResultSet result;
+    private DataSource dataSource;
+    private DSLContext context;
 
     public DatabaseConnector() {
-
+        dataSource = configureDataSource();
+        context = DSL.using(dataSource, SQLDialect.MYSQL);
     }
 
-    public void setRequest(String request) {
-        this.request = request;
+    private static DataSource configureDataSource() {
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl(jdbcUrl);
+        config.setUsername(username);
+        config.setPassword(password);
+
+        return new HikariDataSource(config);
     }
 
-    public void connect() {
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            connection = DriverManager.getConnection(url, username, password);
-        } catch (SQLException e) {
-            throw new RuntimeException("Une erreur est survenue lors de la connexion à la base de donnée.", e);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+    public DSLContext getContext() {
+        return context;
     }
 
-    public ResultSet execute() throws SQLException {
-        Statement statement = connection.createStatement();
-        result = statement.executeQuery(request);
-        return result;
+    public DataSource getDataSource() {
+        return dataSource;
     }
-
-    public int executeRegister(User user) throws SQLException {
-        PreparedStatement statement = connection.prepareStatement(request);
-        statement.setObject(1, null); // id autoincrement
-        statement.setString(2, user.getUsername()); // username
-        statement.setString(3, BCrypt.hashpw(user.getPassword(),BCrypt.gensalt())); // password
-        statement.setString(4, user.getMail()); // mail
-        return statement.executeUpdate();
-    }
-
-    public ResultSet verifyUsername(User user) throws SQLException {
-        PreparedStatement statement = connection.prepareStatement(request);
-        statement.setString(1,user.getUsername());
-        result = statement.executeQuery(request);
-        return result;
-    }
-
-    public void close() throws SQLException {
-        if (connection != null) {
-            connection.close();
-        }
-    }
-
-    public List<String> getColumnResultAsList() throws SQLException {
-        List<String> resultList = new ArrayList<>();
-        if (result != null) {
-            while (result.next()) {
-                resultList.add(result.getString(0));
-            }
-        }
-        return resultList;
-    }
-
 }

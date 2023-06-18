@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.SQLException;
+import java.util.Objects;
 
 import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.table;
@@ -19,18 +20,20 @@ import static org.jooq.impl.DSL.table;
 @RequestMapping("/test")
 public class LoginApi {
 
-    @GetMapping("/login")
+    @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody User user) throws SQLException {
 
         if (Strings.isNotBlank(user.getUsername())
                 && Strings.isNotBlank(user.getPassword())) {
-            verifyUsernameAndPassword(user);
+            if(compareHashedPassword(user)) {
+                return ResponseEntity.ok("You're logged in !");
+            }
         }
         return ResponseEntity.ok("Fields empty !");
     }
 
 
-    private boolean verifyUsernameAndPassword(User user) throws SQLException {
+    private String getHashedPasswordFromUsername(User user) throws SQLException {
 
         DatabaseConnector databaseConnection = new DatabaseConnector();
         SelectQuery<Record> query = databaseConnection.getContext().selectQuery();
@@ -40,10 +43,16 @@ public class LoginApi {
         query.addSelect(usersTable.fields());
         query.addFrom(usersTable);
         query.addConditions(usernameField.eq(user.getUsername()));
-        query.addConditions(passwordField.eq(BCrypt.hashpw(user.getPassword(),BCrypt.gensalt())));
         // Execute the query
         Result<Record> result = query.fetch();
         databaseConnection.getDataSource().getConnection().close();
-        return !result.isEmpty();
+        if(result.isNotEmpty()){
+            return Objects.requireNonNull(result.get(0).get(2)).toString();
+        }
+        return "";
+    }
+
+    private boolean compareHashedPassword(User user) throws SQLException {
+        return BCrypt.checkpw(user.getPassword(),getHashedPasswordFromUsername(user));
     }
 }

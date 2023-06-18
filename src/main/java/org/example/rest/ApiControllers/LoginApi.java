@@ -16,7 +16,7 @@ import static org.jooq.impl.DSL.table;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/test")
 public class LoginApi {
 
     @GetMapping("/login")

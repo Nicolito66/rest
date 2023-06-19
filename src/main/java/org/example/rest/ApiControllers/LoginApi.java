@@ -37,8 +37,9 @@ public class LoginApi {
                 headers.add(HttpHeaders.SET_COOKIE, cookie.getValue());
                 String responseBody = "You're logged in !";
                 HttpStatus status = HttpStatus.OK;
-                ResponseEntity<String> responseWithCookie = new ResponseEntity<>(responseBody, headers, status);
-                return responseWithCookie;
+                //FIXME: Passer le cookie dans le header
+                //ResponseEntity<String> responseWithCookie = new ResponseEntity<>(responseBody, headers, status);
+                return ResponseEntity.ok(cookie.getValue());
             }
             return ResponseEntity.ok("Wrong user or password !");
         }

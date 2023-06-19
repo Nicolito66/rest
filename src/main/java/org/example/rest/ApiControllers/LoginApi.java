@@ -72,32 +72,22 @@ public class LoginApi {
         return BCrypt.checkpw(user.getPassword(),hashedPassword);
     }
 
+
     private Cookie createCookie(User user) throws SQLException {
         DatabaseConnector databaseConnection = new DatabaseConnector();
         // Récupération de l'id du client
         SelectQuery<Record> query = databaseConnection.getContext().selectQuery();
-        Table<Record> usersTable = table("users");
-        Field<String> usernameField = field("username", String.class);
-        query.addSelect(usersTable.fields());
-        query.addFrom(usersTable);
-        query.addConditions(usernameField.eq(user.getUsername()));
-        // Execute the query
-        Result<Record> result = query.fetch();
+         int userId = DatabaseUtils.getUserId(user,databaseConnection);
         String cookieName = "auth";
         String cookieValue = "";
         Cookie cookie = new Cookie(cookieName, cookieValue);
 
-        if(result.isNotEmpty()) {
-            int user_id = (Integer) result.get(0).get(0);
+        if(userId >= 0) {
             // Création du cookie
             cookieValue = UUID.randomUUID().toString();
             // Stockage du cookie en base
-            InsertValuesStep2<Record, Integer, String> insert = databaseConnection.getContext()
-                    .insertInto(table("users_configuration"))
-                    .columns(field("user_id", Integer.class), field("cookie", String.class))
-                    .values(user_id, cookieValue);
-            int numberRowsInjected = insert.execute();
-            if (numberRowsInjected == 1) {
+            boolean cookieUpdated = DatabaseUtils.UpdateCookie(userId,databaseConnection,cookieValue);
+            if (cookieUpdated) {
                 cookie.setValue(cookieValue);
             }
             databaseConnection.getDataSource().getConnection().close();

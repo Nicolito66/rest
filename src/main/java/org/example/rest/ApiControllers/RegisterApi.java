@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
 
+import static org.example.rest.ApiControllers.DatabaseUtils.insertEmptyCookie;
 import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.table;
 
@@ -54,21 +55,19 @@ public class RegisterApi {
         int numberRowsInjected = insert.execute();
         databaseConnection.getDataSource().getConnection().close();
 
-        return numberRowsInjected == 1;
+        // On récupère le userId créé par la bdd
+
+        Integer userId = DatabaseUtils.getUserId(user,databaseConnection);
+
+        Boolean emptyCookieInserted = insertEmptyCookie(userId,databaseConnection);
+
+        return numberRowsInjected == 1 && emptyCookieInserted;
     }
 
     private boolean isUsernameAlreadyTook(User user) throws SQLException {
-
         DatabaseConnector databaseConnection = new DatabaseConnector();
-        SelectQuery<Record> query = databaseConnection.getContext().selectQuery();
-        Table<Record> usersTable = table("users");
-        Field<String> usernameField = field("username", String.class);
-        query.addSelect(usersTable.fields());
-        query.addFrom(usersTable);
-        query.addConditions(usernameField.eq(user.getUsername()));
-        // Execute the query
-        Result<Record> result = query.fetch();
+        Boolean usernameExists = DatabaseUtils.checkIfUsernameExists(user,databaseConnection);
         databaseConnection.getDataSource().getConnection().close();
-        return !result.isEmpty();
+        return usernameExists;
     }
 }

@@ -35,15 +35,13 @@ public class LoginApi {
                 Cookie cookie = createCookie(user);
                 HttpHeaders headers = new HttpHeaders();
                 headers.add(HttpHeaders.SET_COOKIE, cookie.getValue());
-                String responseBody = "You're logged in !";
-                HttpStatus status = HttpStatus.OK;
                 //FIXME: Passer le cookie dans le header
                 //ResponseEntity<String> responseWithCookie = new ResponseEntity<>(responseBody, headers, status);
                 return ResponseEntity.ok(cookie.getValue());
             }
-            return ResponseEntity.ok("Wrong user or password !");
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body("Wrong username or password !");
         }
-        return ResponseEntity.ok("Fields empty !");
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body("Field Empty !");
     }
 
 

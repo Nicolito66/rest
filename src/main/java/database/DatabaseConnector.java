@@ -10,8 +10,8 @@ import javax.sql.DataSource;
 
 public class DatabaseConnector {
     private static String jdbcUrl = "jdbc:mysql://localhost:3306/db";
-    private static String username = "root";
-    private static String password = "HelloWorld99!";
+    private static String username = "test";
+    private static String password = "testPassword99!";
     private DataSource dataSource;
     private DSLContext context;
 

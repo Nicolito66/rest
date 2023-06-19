@@ -5,9 +5,6 @@ import database.DatabaseConnector;
 import org.jooq.*;
 import org.jooq.Record;
 
-import javax.servlet.http.Cookie;
-import javax.xml.crypto.Data;
-
 import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.table;
 

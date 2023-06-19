@@ -34,7 +34,7 @@ public class LoginApi {
             if(compareHashedPassword(user)) {
                 Cookie cookie = createCookie(user);
                 HttpHeaders headers = new HttpHeaders();
-                headers.add(HttpHeaders.SET_COOKIE, cookie.toString());
+                headers.add(HttpHeaders.SET_COOKIE, cookie.getValue());
                 String responseBody = "You're logged in !";
                 HttpStatus status = HttpStatus.OK;
                 ResponseEntity<String> responseWithCookie = new ResponseEntity<>(responseBody, headers, status);

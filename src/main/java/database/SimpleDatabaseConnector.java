@@ -6,8 +6,8 @@ import java.util.List;
 
 
 public class SimpleDatabaseConnector {
-    private static String username = "nicolas";
-    private static String password = "Ficellejulien66!";
+    private static String username = "root";
+    private static String password = "HelloWorld99!";
     private static String url = "jdbc:mysql://localhost:3306/db";
     private Connection connection;
 

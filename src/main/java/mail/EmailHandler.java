@@ -9,7 +9,7 @@ public class EmailHandler {
     private static String smtpHost = "smtp.office365.com";
     private String username;
     private String password;
-    private static String fromAddress = "nicolas-marquette@hotmail.fr";
+    private String fromAddress;
 
     private static int smtpPort = 587;
 

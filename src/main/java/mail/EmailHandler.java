@@ -15,6 +15,8 @@ public class EmailHandler {
 
     public EmailHandler(String username, String password) {
         this.username = username;
+        // Pour le moment l'adresse d'envoie est l'adresse principale
+        this.fromAddress = username;
         this.password = password;
     }
 

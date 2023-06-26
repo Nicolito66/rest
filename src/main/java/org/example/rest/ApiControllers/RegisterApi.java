@@ -9,6 +9,7 @@ import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.xml.crypto.Data;
 import java.sql.SQLException;
 
 import static org.example.rest.ApiControllers.DatabaseUtils.insertEmptyCookie;
@@ -35,20 +36,19 @@ public class RegisterApi {
         if (Strings.isNotBlank(user.getUsername())
                 && Strings.isNotBlank(user.getPassword())
                 && Strings.isNotBlank(user.getMail())) {
-            if (!isUsernameAlreadyTook(user, databaseConnection)) {
-                if (handleRegistration(user)) {
+            if (!isUsernameOrEmailAlreadyTook(user, databaseConnection)) {
+                if (handleRegistration(user, databaseConnection)) {
                         DatabaseUtils.UpdateVerificationCode(user.getId(), databaseConnection,user.getMail());
                     return ResponseEntity.ok("User successfully registered !");
                 }
                 return ResponseEntity.ok("An error was occured during registration !");
             }
-            return ResponseEntity.ok("Username is already took !");
+            return ResponseEntity.ok("Username or Email is already took !");
         }
         return ResponseEntity.ok("Fields empty !");
     }
 
-    private boolean handleRegistration(User user) throws SQLException {
-        DatabaseConnector databaseConnection = new DatabaseConnector();
+    private boolean handleRegistration(User user,DatabaseConnector databaseConnection) throws SQLException {
         InsertValuesStep4<Record, Integer, String, String, String> insert = databaseConnection.getContext()
                 .insertInto(table("users"))
                 .columns(field("id", Integer.class), field("username", String.class), field("password", String.class), field("mail", String.class))
@@ -66,9 +66,10 @@ public class RegisterApi {
         return numberRowsInjected == 1 && emptyCookieInserted;
     }
 
-    private boolean isUsernameAlreadyTook(User user, DatabaseConnector databaseConnection) throws SQLException {
+    private boolean isUsernameOrEmailAlreadyTook(User user, DatabaseConnector databaseConnection) throws SQLException {
         Boolean usernameExists = DatabaseUtils.checkIfUsernameExists(user,databaseConnection);
+        Boolean emailExists = DatabaseUtils.checkIfEmailExists(user,databaseConnection);
         databaseConnection.getDataSource().getConnection().close();
-        return usernameExists;
+        return usernameExists || emailExists;
     }
 }

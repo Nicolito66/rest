@@ -54,6 +54,20 @@ public class DatabaseUtils {
         return !result.isEmpty();
     }
 
+    public static boolean checkIfEmailExists(User user, DatabaseConnector databaseConnection) {
+        SelectQuery<Record> query = databaseConnection.getContext().selectQuery();
+
+        Table<Record> usersTable = table("users");
+        Field<String> usernameField = field("mail", String.class);
+        query.addSelect(usersTable.fields());
+        query.addFrom(usersTable);
+        query.addConditions(usernameField.eq(user.getMail()));
+        // Execute the query
+        Result<Record> result = query.fetch();
+
+        return !result.isEmpty();
+    }
+
     public static boolean UpdateCookie(int userId, DatabaseConnector databaseConnection, String cookieValue) {
         UpdateConditionStep<Record> query = databaseConnection.getContext().update(table("users_configuration"))
                 .set(field("cookie"), cookieValue)

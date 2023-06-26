@@ -20,7 +20,7 @@ public class EmailHandler {
         this.password = password;
     }
 
-    public void sendEmail(String toAddress, String subject, String body) {
+    public void sendEmail(String toAddress, String subject, String htmlContent) {
         Properties props = new Properties();
         props.put("mail.smtp.host", smtpHost);
         props.put("mail.smtp.port", smtpPort);
@@ -39,7 +39,13 @@ public class EmailHandler {
             message.setFrom(new InternetAddress(fromAddress));
             message.addRecipient(Message.RecipientType.TO, new InternetAddress(toAddress));
             message.setSubject(subject);
-            message.setText(body);
+            MimeBodyPart messageBodyPart = new MimeBodyPart();
+            messageBodyPart.setContent(htmlContent, "text/html");
+
+            Multipart multipart = new MimeMultipart();
+            multipart.addBodyPart(messageBodyPart);
+
+            message.setContent(multipart);
 
             // Envoi de l'e-mail
             Transport.send(message);

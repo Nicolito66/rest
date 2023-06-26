@@ -31,7 +31,7 @@ public class LoginApi {
         DatabaseConnector databaseConnection = new DatabaseConnector();
         if (Strings.isNotBlank(user.getUsername())
                 && Strings.isNotBlank(user.getPassword())) {
-            if(compareHashedPassword(user)) {
+            if(compareHashedPassword(user, databaseConnection)) {
                 Cookie cookie = createCookie(user, databaseConnection);
                 HttpHeaders headers = new HttpHeaders();
                 headers.add(HttpHeaders.SET_COOKIE, cookie.getValue());
@@ -45,9 +45,8 @@ public class LoginApi {
     }
 
 
-    private String getHashedPasswordFromUsername(User user) throws SQLException {
+    private String getHashedPasswordFromUsername(User user, DatabaseConnector databaseConnection) throws SQLException {
 
-        DatabaseConnector databaseConnection = new DatabaseConnector();
         SelectQuery<Record> query = databaseConnection.getContext().selectQuery();
         Table<Record> usersTable = table("users");
         Field<String> usernameField = field("username", String.class);
@@ -63,8 +62,8 @@ public class LoginApi {
         return "";
     }
 
-    private boolean compareHashedPassword(User user) throws SQLException {
-        String hashedPassword = getHashedPasswordFromUsername(user);
+    private boolean compareHashedPassword(User user, DatabaseConnector databaseConnection) throws SQLException {
+        String hashedPassword = getHashedPasswordFromUsername(user, databaseConnection);
             if (hashedPassword.isEmpty()) {
                 return false;
             }

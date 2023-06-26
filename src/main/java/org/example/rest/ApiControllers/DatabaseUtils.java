@@ -2,8 +2,11 @@ package org.example.rest.ApiControllers;
 
 import classes.User;
 import database.DatabaseConnector;
+import mail.EmailVerification;
 import org.jooq.*;
 import org.jooq.Record;
+
+import java.util.Random;
 
 import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.table;
@@ -28,10 +31,10 @@ public class DatabaseUtils {
         return -1;
     }
     public static boolean insertEmptyCookie(int userId, DatabaseConnector databaseConnection) {
-        InsertValuesStep2<Record, Integer, String> insertCookie = databaseConnection.getContext()
+        InsertValuesStep3<Record, Integer, String, String> insertCookie = databaseConnection.getContext()
                 .insertInto(table("users_configuration"))
-                .columns(field("user_id", Integer.class), field("cookie", String.class))
-                .values(userId, "");
+                .columns(field("user_id", Integer.class), field("cookie", String.class),field("mail_verification", String.class))
+                .values(userId, "","");
         int numberRowsInjected = insertCookie.execute();
 
         return numberRowsInjected == 1;
@@ -60,4 +63,35 @@ public class DatabaseUtils {
 
         return numberRowsInjected == 1;
     }
+
+    public static String getUserMail(User user, DatabaseConnector databaseConnection) {
+        SelectQuery<Record> query = databaseConnection.getContext().selectQuery();
+        Table<Record> usersTable = table("users");
+        Field<String> usernameField = field("mail", String.class);
+        query.addSelect(usersTable.fields());
+        query.addFrom(usersTable);
+        query.addConditions(usernameField.eq(user.getUsername()));
+        // Execute the query
+        Result<Record> result = query.fetch();
+        if (result.isNotEmpty()) {
+            return (String) result.get(0).get(0);
+        }
+        return null;
+    }
+
+    public static String UpdateVerificationCode(int userId, DatabaseConnector databaseConnection, String mail) {
+        Random random = new Random();
+        int code = random.nextInt(1000000); // Génère un nombre aléatoire entre 0 et 999999
+        String formattedCode = String.format("%06d", code);
+        UpdateConditionStep<Record> query = databaseConnection.getContext().update(table("users_configuration"))
+                .set(field("mail_verification"), formattedCode)
+                .where(field("user_id").eq(userId));
+        if(query.execute() == 1) {
+            EmailVerification emailVerification = new EmailVerification();
+            emailVerification.SendVerificationMail(mail, formattedCode);
+            return formattedCode;
+        }
+        return null;
+    }
+
 }

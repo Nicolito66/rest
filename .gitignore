@@ -31,3 +31,5 @@ build/
 
 ### VS Code ###
 .vscode/
+/config.properties
+/src/main/java/org/example/rest/ApiControllers/config.properties

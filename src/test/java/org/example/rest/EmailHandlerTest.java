@@ -1,6 +1,7 @@
 package org.example.rest;
 
 import mail.EmailHandler;
+import mail.EmailVerification;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -30,6 +31,13 @@ public class EmailHandlerTest {
             e.printStackTrace();
         }
 
+
+    }
+
+    @Test
+    public void sendVerificationEmail() {
+        EmailVerification emailVerification = new EmailVerification();
+        emailVerification.SendVerificationMail("nico","999999");
 
     }
 }

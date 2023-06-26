@@ -31,12 +31,13 @@ public class RegisterApi {
 
     @PutMapping("/register")
     public ResponseEntity<String> register(@RequestBody User user) throws SQLException {
-
+        DatabaseConnector databaseConnection = new DatabaseConnector();
         if (Strings.isNotBlank(user.getUsername())
                 && Strings.isNotBlank(user.getPassword())
                 && Strings.isNotBlank(user.getMail())) {
-            if (!isUsernameAlreadyTook(user)) {
+            if (!isUsernameAlreadyTook(user, databaseConnection)) {
                 if (handleRegistration(user)) {
+                        DatabaseUtils.UpdateVerificationCode(user.getId(), databaseConnection,user.getMail());
                     return ResponseEntity.ok("User successfully registered !");
                 }
                 return ResponseEntity.ok("An error was occured during registration !");
@@ -58,14 +59,14 @@ public class RegisterApi {
         // On récupère le userId créé par la bdd
 
         Integer userId = DatabaseUtils.getUserId(user,databaseConnection);
+        user.setId(userId);
 
         Boolean emptyCookieInserted = insertEmptyCookie(userId,databaseConnection);
 
         return numberRowsInjected == 1 && emptyCookieInserted;
     }
 
-    private boolean isUsernameAlreadyTook(User user) throws SQLException {
-        DatabaseConnector databaseConnection = new DatabaseConnector();
+    private boolean isUsernameAlreadyTook(User user, DatabaseConnector databaseConnection) throws SQLException {
         Boolean usernameExists = DatabaseUtils.checkIfUsernameExists(user,databaseConnection);
         databaseConnection.getDataSource().getConnection().close();
         return usernameExists;

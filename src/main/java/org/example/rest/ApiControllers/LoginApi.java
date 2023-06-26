@@ -28,11 +28,11 @@ public class LoginApi {
 
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody User user) throws SQLException {
-
+        DatabaseConnector databaseConnection = new DatabaseConnector();
         if (Strings.isNotBlank(user.getUsername())
                 && Strings.isNotBlank(user.getPassword())) {
             if(compareHashedPassword(user)) {
-                Cookie cookie = createCookie(user);
+                Cookie cookie = createCookie(user, databaseConnection);
                 HttpHeaders headers = new HttpHeaders();
                 headers.add(HttpHeaders.SET_COOKIE, cookie.getValue());
                 //FIXME: Passer le cookie dans le header
@@ -72,8 +72,7 @@ public class LoginApi {
     }
 
 
-    private Cookie createCookie(User user) throws SQLException {
-        DatabaseConnector databaseConnection = new DatabaseConnector();
+    private Cookie createCookie(User user, DatabaseConnector databaseConnection) throws SQLException {
         // Récupération de l'id du client
         SelectQuery<Record> query = databaseConnection.getContext().selectQuery();
          int userId = DatabaseUtils.getUserId(user,databaseConnection);

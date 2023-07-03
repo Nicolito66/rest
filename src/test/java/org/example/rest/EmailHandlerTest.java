@@ -13,6 +13,9 @@ import java.util.Properties;
 @SpringBootTest
 public class EmailHandlerTest {
 
+    private String username;
+    private String password;
+
     @Test
     public void sendEmail() {
         Properties properties = new Properties();
@@ -21,8 +24,8 @@ public class EmailHandlerTest {
             properties.load(input);
 
             // Lecture des mots de passe pour les utilisateurs
-            String username = properties.getProperty("smtp.user");
-            String password = properties.getProperty("smtp.password");
+            username = properties.getProperty("smtp.user");
+            password = properties.getProperty("smtp.password");
 
             EmailHandler emailHandler = new EmailHandler(username,password);
             emailHandler.sendEmail(username,"Hello Test","Ceci est le body du mail 2");
@@ -37,7 +40,7 @@ public class EmailHandlerTest {
     @Test
     public void sendVerificationEmail() {
         EmailVerification emailVerification = new EmailVerification();
-        emailVerification.SendVerificationMail("nico","999999");
+        emailVerification.SendVerificationMail(username,"999999");
 
     }
 }

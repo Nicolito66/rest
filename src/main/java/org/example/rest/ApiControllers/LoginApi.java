@@ -17,9 +17,6 @@ import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.table;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController

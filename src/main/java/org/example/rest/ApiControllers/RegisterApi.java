@@ -1,6 +1,8 @@
 package org.example.rest.ApiControllers;
 
 import classes.User;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import database.DatabaseConnector;
 import org.apache.logging.log4j.util.Strings;
 import org.jooq.*;
@@ -31,7 +33,7 @@ public class RegisterApi {
     }
 
     @PutMapping("/register")
-    public ResponseEntity<String> register(@RequestBody User user) throws SQLException {
+    public ResponseEntity<User> register(@RequestBody User user) throws SQLException {
         DatabaseConnector databaseConnection = new DatabaseConnector();
         if (Strings.isNotBlank(user.getUsername())
                 && Strings.isNotBlank(user.getPassword())
@@ -39,13 +41,13 @@ public class RegisterApi {
             if (!isUsernameOrEmailAlreadyTook(user, databaseConnection)) {
                 if (handleRegistration(user, databaseConnection)) {
                         DatabaseUtils.UpdateVerificationCode(user.getId(), databaseConnection,user.getMail());
-                    return ResponseEntity.ok("User successfully registered !");
+                    return ResponseEntity.ok(user);
                 }
-                return ResponseEntity.ok("An error was occured during registration !");
+                return ResponseEntity.badRequest().build();
             }
-            return ResponseEntity.ok("Username or Email is already took !");
+            return ResponseEntity.badRequest().build();
         }
-        return ResponseEntity.ok("Fields empty !");
+        return ResponseEntity.badRequest().build();
     }
 
     private boolean handleRegistration(User user,DatabaseConnector databaseConnection) throws SQLException {

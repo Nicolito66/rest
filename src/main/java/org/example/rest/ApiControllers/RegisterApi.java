@@ -7,6 +7,7 @@ import org.apache.logging.log4j.util.Strings;
 import org.jooq.*;
 import org.jooq.Record;
 import org.mindrot.jbcrypt.BCrypt;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,11 +40,11 @@ public class RegisterApi {
                         DatabaseUtils.UpdateVerificationCode(user.getId(), databaseConnection,user.getMail());
                     return ResponseEntity.ok(new Response(user,200,"User has been registered !"));
                 }
-                return ResponseEntity.badRequest().body(new Response(null,301,"An error has occured !"));
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response(null,301,"An error has occured !"));
             }
-            return ResponseEntity.badRequest().body(new Response(null,301,"Username or email already exists !"));
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new Response(null,301,"Username or email already exists !"));
         }
-        return ResponseEntity.badRequest().body(new Response(null,301,"A field is empty !"));
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new Response(null,301,"A field is empty !"));
     }
 
     private boolean handleRegistration(User user,DatabaseConnector databaseConnection) throws SQLException {

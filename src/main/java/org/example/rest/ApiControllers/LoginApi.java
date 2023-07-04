@@ -6,6 +6,7 @@ import database.DatabaseConnector;
 import org.apache.logging.log4j.util.Strings;
 import org.jooq.*;
 import org.jooq.Record;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.mindrot.jbcrypt.BCrypt;
@@ -36,9 +37,9 @@ public class LoginApi {
                 //ResponseEntity<String> responseWithCookie = new ResponseEntity<>(responseBody, headers, status);
                 return ResponseEntity.ok(new Response(cookie.getValue(),200,"User has been logged in !"));
             }
-            return ResponseEntity.badRequest().body(new Response(null,301,"Wrong username or password !"));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response(null,301,"Wrong username or password !"));
         }
-        return ResponseEntity.badRequest().body(new Response(null,301,"A field is empty !"));
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new Response(null,301,"A field is empty !"));
     }
 
 

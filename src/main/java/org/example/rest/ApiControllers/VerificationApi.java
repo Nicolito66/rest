@@ -6,6 +6,7 @@ import database.DatabaseConnector;
 import org.apache.logging.log4j.util.Strings;
 import org.jooq.*;
 import org.jooq.Record;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,7 +28,7 @@ public class VerificationApi {
                 return ResponseEntity.ok(new Response(null,200,"User has been verified"));
             }
         }
-        return ResponseEntity.badRequest().body(new Response(null,200,"Wrong code !"));
+        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new Response(null,200,"Wrong code !"));
     }
 
     private boolean handleVerification(VerificationInfos verificationInfos, DatabaseConnector databaseConnection) {

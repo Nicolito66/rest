@@ -15,6 +15,7 @@ public class DatabaseConnector {
     private DataSource dataSource;
     private DSLContext context;
 
+
     public DatabaseConnector() {
         dataSource = configureDataSource();
         context = DSL.using(dataSource, SQLDialect.MYSQL);

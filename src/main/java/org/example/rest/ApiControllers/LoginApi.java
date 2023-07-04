@@ -2,6 +2,7 @@ package org.example.rest.ApiControllers;
 
 import classes.Response;
 import classes.User;
+import classes.VerificationInfos;
 import database.DatabaseConnector;
 import org.apache.logging.log4j.util.Strings;
 import org.jooq.*;
@@ -15,6 +16,7 @@ import java.util.UUID;
 import java.sql.SQLException;
 import java.util.Objects;
 
+import static org.example.rest.ApiControllers.VerificationApi.checkIfUserIsVerified;
 import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.table;
 import org.springframework.http.HttpHeaders;
@@ -30,12 +32,17 @@ public class LoginApi {
         if (Strings.isNotBlank(user.getUsername())
                 && Strings.isNotBlank(user.getPassword())) {
             if(compareHashedPassword(user, databaseConnection)) {
-                Cookie cookie = createCookie(user, databaseConnection);
-                HttpHeaders headers = new HttpHeaders();
-                headers.add(HttpHeaders.SET_COOKIE, cookie.getValue());
-                //FIXME: Passer le cookie dans le header
-                //ResponseEntity<String> responseWithCookie = new ResponseEntity<>(responseBody, headers, status);
-                return ResponseEntity.ok(new Response(cookie.getValue(),200,"User has been logged in !"));
+                if(checkIfUserIsVerified(user.getUsername(),databaseConnection)) {
+                    Cookie cookie = createCookie(user, databaseConnection);
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.add(HttpHeaders.SET_COOKIE, cookie.getValue());
+                    //FIXME: Passer le cookie dans le header
+                    //ResponseEntity<String> responseWithCookie = new ResponseEntity<>(responseBody, headers, status);
+                    int id = DatabaseUtils.getUserId(user,databaseConnection);
+                    return ResponseEntity.ok(new Response(new VerificationInfos(String.valueOf(id),cookie.getValue()),200,"User has been logged in !"));
+                }
+                int id = DatabaseUtils.getUserId(user,databaseConnection);
+                return ResponseEntity.ok(new Response(new VerificationInfos(String.valueOf(id),null),201,"You need to verify your account !"));
             }
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response(null,301,"Wrong username or password !"));
         }

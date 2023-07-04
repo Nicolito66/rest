@@ -1,6 +1,7 @@
 package org.example.rest.ApiControllers;
 
 import classes.Response;
+import classes.User;
 import classes.VerificationInfos;
 import database.DatabaseConnector;
 import org.apache.logging.log4j.util.Strings;
@@ -31,7 +32,7 @@ public class VerificationApi {
         return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new Response(null,200,"Wrong code !"));
     }
 
-    private boolean handleVerification(VerificationInfos verificationInfos, DatabaseConnector databaseConnection) {
+    private static boolean handleVerification(VerificationInfos verificationInfos, DatabaseConnector databaseConnection) {
         SelectQuery<Record> query = databaseConnection.getContext().selectQuery();
         Table<Record> usersTable = table("users_configuration");
         Field<String> idField = field("user_id", String.class);
@@ -46,7 +47,20 @@ public class VerificationApi {
         return false;
     }
 
-    private boolean setVerifiedAccount(String userId, DatabaseConnector databaseConnection) {
+    static boolean checkIfUserIsVerified(String id, DatabaseConnector databaseConnection) {
+        SelectQuery<Record> query = databaseConnection.getContext().selectQuery();
+
+        Table<Record> usersTable = table("users");
+        Field<String> usernameField = field("username", String.class);
+        query.addSelect(usersTable.fields());
+        query.addFrom(usersTable);
+        query.addConditions(usernameField.eq(id));
+        // Execute the query
+        Result<Record> result = query.fetch();
+        return Boolean.parseBoolean(Objects.requireNonNull(result.get(0).get(4)).toString());
+    }
+
+    private static boolean setVerifiedAccount(String userId, DatabaseConnector databaseConnection) {
         UpdateConditionStep<Record> update = databaseConnection.getContext().update(table("users"))
                 .set(field("verified"), 1)
                 .where(field("id").eq(userId));

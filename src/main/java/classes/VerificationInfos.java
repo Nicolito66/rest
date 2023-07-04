@@ -24,4 +24,9 @@ public class VerificationInfos {
 
     public VerificationInfos() {
     }
+
+    public VerificationInfos(String id, String code) {
+        this.id = id;
+        this.code = code;
+    }
 }

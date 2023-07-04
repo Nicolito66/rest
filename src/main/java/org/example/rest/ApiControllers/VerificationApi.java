@@ -1,12 +1,12 @@
 package org.example.rest.ApiControllers;
 
 import classes.Response;
-import classes.User;
 import classes.VerificationInfos;
 import database.DatabaseConnector;
 import org.apache.logging.log4j.util.Strings;
 import org.jooq.*;
 import org.jooq.Record;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -51,7 +51,7 @@ public class VerificationApi {
         SelectQuery<Record> query = databaseConnection.getContext().selectQuery();
 
         Table<Record> usersTable = table("users");
-        Field<String> usernameField = field("username", String.class);
+        Field<String> usernameField = field("id", String.class);
         query.addSelect(usersTable.fields());
         query.addFrom(usersTable);
         query.addConditions(usernameField.eq(id));

@@ -32,17 +32,16 @@ public class LoginApi {
         if (Strings.isNotBlank(user.getUsername())
                 && Strings.isNotBlank(user.getPassword())) {
             if(compareHashedPassword(user, databaseConnection)) {
-                if(checkIfUserIsVerified(user.getUsername(),databaseConnection)) {
+                int userId = DatabaseUtils.getUserId(user,databaseConnection);
+                if(checkIfUserIsVerified(String.valueOf(userId),databaseConnection)) {
                     Cookie cookie = createCookie(user, databaseConnection);
                     HttpHeaders headers = new HttpHeaders();
                     headers.add(HttpHeaders.SET_COOKIE, cookie.getValue());
                     //FIXME: Passer le cookie dans le header
                     //ResponseEntity<String> responseWithCookie = new ResponseEntity<>(responseBody, headers, status);
-                    int id = DatabaseUtils.getUserId(user,databaseConnection);
-                    return ResponseEntity.ok(new Response(new VerificationInfos(String.valueOf(id),cookie.getValue()),200,"User has been logged in !"));
+                    return ResponseEntity.ok(new Response(new VerificationInfos(String.valueOf(userId),cookie.getValue()),200,"User has been logged in !"));
                 }
-                int id = DatabaseUtils.getUserId(user,databaseConnection);
-                return ResponseEntity.ok(new Response(new VerificationInfos(String.valueOf(id),null),201,"You need to verify your account !"));
+                return ResponseEntity.ok(new Response(new VerificationInfos(String.valueOf(userId),null),201,"You need to verify your account !"));
             }
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response(null,301,"Wrong username or password !"));
         }

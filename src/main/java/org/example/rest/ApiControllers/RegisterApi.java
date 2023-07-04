@@ -1,8 +1,7 @@
 package org.example.rest.ApiControllers;
 
+import classes.Response;
 import classes.User;
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import database.DatabaseConnector;
 import org.apache.logging.log4j.util.Strings;
 import org.jooq.*;
@@ -11,13 +10,11 @@ import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.xml.crypto.Data;
 import java.sql.SQLException;
 
 import static org.example.rest.ApiControllers.DatabaseUtils.insertEmptyCookie;
 import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.table;
-
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
@@ -28,12 +25,11 @@ public class RegisterApi {
     @GetMapping("/")
     @ResponseBody
     public String home() {
-
         return "home";
     }
 
     @PutMapping("/register")
-    public ResponseEntity<User> register(@RequestBody User user) throws SQLException {
+    public ResponseEntity<Response> register(@RequestBody User user) throws SQLException {
         DatabaseConnector databaseConnection = new DatabaseConnector();
         if (Strings.isNotBlank(user.getUsername())
                 && Strings.isNotBlank(user.getPassword())
@@ -41,13 +37,13 @@ public class RegisterApi {
             if (!isUsernameOrEmailAlreadyTook(user, databaseConnection)) {
                 if (handleRegistration(user, databaseConnection)) {
                         DatabaseUtils.UpdateVerificationCode(user.getId(), databaseConnection,user.getMail());
-                    return ResponseEntity.ok(user);
+                    return ResponseEntity.ok(new Response(user,200,"User has been registered !"));
                 }
-                return ResponseEntity.badRequest().build();
+                return ResponseEntity.badRequest().body(new Response(null,301,"An error has occured !"));
             }
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(new Response(null,301,"Username or email already exists !"));
         }
-        return ResponseEntity.badRequest().build();
+        return ResponseEntity.badRequest().body(new Response(null,301,"A field is empty !"));
     }
 
     private boolean handleRegistration(User user,DatabaseConnector databaseConnection) throws SQLException {

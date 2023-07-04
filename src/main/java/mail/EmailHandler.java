@@ -41,19 +41,15 @@ public class EmailHandler {
             message.setSubject(subject);
             MimeBodyPart messageBodyPart = new MimeBodyPart();
             messageBodyPart.setContent(htmlContent, "text/html");
-
             Multipart multipart = new MimeMultipart();
             multipart.addBodyPart(messageBodyPart);
-
             message.setContent(multipart);
 
             // Envoi de l'e-mail
             Transport.send(message);
-
             System.out.println("E-mail envoyé avec succès !");
         } catch (MessagingException e) {
             System.out.println("Erreur lors de l'envoi de l'e-mail : " + e.getMessage());
         }
-
     }
 }

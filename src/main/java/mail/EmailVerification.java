@@ -11,7 +11,6 @@ public class EmailVerification {
     }
 
     private String buildVerificationMailBody(String secretCode) {
-
         return "<!DOCTYPE html>\n" +
                 "<html>\n" +
                 "<head>\n" +
@@ -75,17 +74,13 @@ public class EmailVerification {
         Properties properties = new Properties();
         try (InputStream input = new FileInputStream("/home/nicolas/project/rest/src/main/java/org/example/rest/ApiControllers/config.properties")) {
             properties.load(input);
-
             // Lecture des mots de passe pour les utilisateurs
             String username = properties.getProperty("smtp.user");
             String password = properties.getProperty("smtp.password");
-            // JUSTE POUR TESTER A SUPPRIMER
-
             EmailHandler emailHandler = new EmailHandler(username,password);
             emailHandler.sendEmail(mailToAdress,"Code de vérification",buildVerificationMailBody(secretCode));
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
 }

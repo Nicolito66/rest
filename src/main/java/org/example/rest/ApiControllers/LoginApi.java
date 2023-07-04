@@ -1,5 +1,6 @@
 package org.example.rest.ApiControllers;
 
+import classes.Response;
 import classes.User;
 import database.DatabaseConnector;
 import org.apache.logging.log4j.util.Strings;
@@ -16,7 +17,6 @@ import java.util.Objects;
 import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.table;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
@@ -24,7 +24,7 @@ import org.springframework.http.HttpStatus;
 public class LoginApi {
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody User user) throws SQLException {
+    public ResponseEntity<Response> login(@RequestBody User user) throws SQLException {
         DatabaseConnector databaseConnection = new DatabaseConnector();
         if (Strings.isNotBlank(user.getUsername())
                 && Strings.isNotBlank(user.getPassword())) {
@@ -34,11 +34,11 @@ public class LoginApi {
                 headers.add(HttpHeaders.SET_COOKIE, cookie.getValue());
                 //FIXME: Passer le cookie dans le header
                 //ResponseEntity<String> responseWithCookie = new ResponseEntity<>(responseBody, headers, status);
-                return ResponseEntity.ok(cookie.getValue());
+                return ResponseEntity.ok(new Response(cookie.getValue(),200,"User has been logged in !"));
             }
-            return ResponseEntity.status(HttpStatus.ACCEPTED).body("Wrong username or password !");
+            return ResponseEntity.badRequest().body(new Response(null,301,"Wrong username or password !"));
         }
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body("Field Empty !");
+        return ResponseEntity.badRequest().body(new Response(null,301,"A field is empty !"));
     }
 
 
@@ -75,7 +75,6 @@ public class LoginApi {
         String cookieName = "auth";
         String cookieValue = "";
         Cookie cookie = new Cookie(cookieName, cookieValue);
-
         if(userId >= 0) {
             // Création du cookie
             cookieValue = UUID.randomUUID().toString();

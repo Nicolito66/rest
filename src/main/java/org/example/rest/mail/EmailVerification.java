@@ -72,7 +72,7 @@ public class EmailVerification {
 
     public void SendVerificationMail(String mailToAdress, String secretCode) {
         Properties properties = new Properties();
-        try (InputStream input = new FileInputStream("/home/nicolas/project/rest/src/main/java/org/example/rest/ApiControllers/config.properties")) {
+        try (InputStream input = new FileInputStream("../config.properties")) {
             properties.load(input);
             // Lecture des mots de passe pour les utilisateurs
             String username = properties.getProperty("smtp.user");

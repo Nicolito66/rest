@@ -74,7 +74,6 @@ public class DatabaseUtils {
                 .where(field("user_id").eq(userId));
         int numberRowsInjected = query.execute();
 
-
         return numberRowsInjected == 1;
     }
 

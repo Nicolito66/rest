@@ -2,6 +2,7 @@ package org.example.rest.ApiControllers;
 
 import classes.Response;
 import classes.User;
+import org.apache.commons.validator.routines.EmailValidator;
 import org.example.rest.database.DatabaseConnector;
 import org.apache.logging.log4j.util.Strings;
 import org.jooq.*;
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.example.rest.ApiControllers.DatabaseUtils.insertEmptyCookie;
 import static org.jooq.impl.DSL.field;
@@ -39,9 +42,7 @@ public class RegisterApi {
 
     @PutMapping("/register")
     public ResponseEntity<Response> register(@RequestBody User user) throws SQLException {
-        if (Strings.isNotBlank(user.getUsername())
-                && Strings.isNotBlank(user.getPassword())
-                && Strings.isNotBlank(user.getMail())) {
+        if (checkUserFields(user)) {
             if (!isUsernameOrEmailAlreadyTook(user, databaseConnection)) {
                 if (handleRegistration(user)) {
                         DatabaseUtils.UpdateVerificationCode(user.getId(), databaseConnection,user.getMail());
@@ -51,7 +52,20 @@ public class RegisterApi {
             }
             return ResponseEntity.status(HttpStatus.CONFLICT).body(new Response(null,301,"Username or email already exists !"));
         }
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new Response(null,301,"A field is empty !"));
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new Response(null,301,"A field is incorrect !"));
+    }
+
+    private boolean checkUserFields(User user) {
+        // On vérifie que le nom d'utilisateur est dans un format accepté
+        String regex = "^(?![0-9])[\\p{Alpha}\\p{Digit}]+$";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(user.getUsername());
+        return Strings.isNotBlank(user.getUsername())
+                && user.getUsername().length() >= 5
+                && matcher.matches()
+                && Strings.isNotBlank(user.getPassword())
+                && user.getPassword().length() > 8
+                && EmailValidator.getInstance().isValid(user.getMail());
     }
 
     private boolean handleRegistration(User user) throws SQLException {

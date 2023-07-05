@@ -1,4 +1,4 @@
-package mail;
+package org.example.rest.mail;
 
 import java.util.Properties;
 import javax.mail.*;

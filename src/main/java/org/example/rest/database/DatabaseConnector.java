@@ -1,13 +1,20 @@
-package database;
+package org.example.rest.database;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import jakarta.annotation.PreDestroy;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
 
+@Component
+@ComponentScan
+@Scope("singleton")
 public class DatabaseConnector {
     private static String jdbcUrl = "jdbc:mysql://localhost:3306/db";
     private static String username = "test";

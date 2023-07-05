@@ -1,8 +1,8 @@
 package org.example.rest.ApiControllers;
 
 import classes.User;
-import database.DatabaseConnector;
-import mail.EmailVerification;
+import org.example.rest.database.DatabaseConnector;
+import org.example.rest.mail.EmailVerification;
 import org.jooq.*;
 import org.jooq.Record;
 

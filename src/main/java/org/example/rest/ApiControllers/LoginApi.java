@@ -3,10 +3,11 @@ package org.example.rest.ApiControllers;
 import classes.Response;
 import classes.User;
 import classes.VerificationInfos;
-import database.DatabaseConnector;
+import org.example.rest.database.DatabaseConnector;
 import org.apache.logging.log4j.util.Strings;
 import org.jooq.*;
 import org.jooq.Record;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,15 +27,21 @@ import org.springframework.http.HttpHeaders;
 @RequestMapping("/api")
 public class LoginApi {
 
+    private final DatabaseConnector databaseConnection;
+
+    @Autowired
+    public LoginApi(DatabaseConnector databaseConnector) {
+        this.databaseConnection = databaseConnector;
+    }
+
     @PostMapping("/login")
     public ResponseEntity<Response> login(@RequestBody User user) throws SQLException {
-        DatabaseConnector databaseConnection = new DatabaseConnector();
         if (Strings.isNotBlank(user.getUsername())
                 && Strings.isNotBlank(user.getPassword())) {
-            if(compareHashedPassword(user, databaseConnection)) {
+            if(compareHashedPassword(user)) {
                 int userId = DatabaseUtils.getUserId(user,databaseConnection);
                 if(checkIfUserIsVerified(String.valueOf(userId),databaseConnection)) {
-                    Cookie cookie = createCookie(user, databaseConnection);
+                    Cookie cookie = createCookie(user);
                     HttpHeaders headers = new HttpHeaders();
                     headers.add(HttpHeaders.SET_COOKIE, cookie.getValue());
                     //FIXME: Passer le cookie dans le header
@@ -49,7 +56,7 @@ public class LoginApi {
     }
 
 
-    private String getHashedPasswordFromUsername(User user, DatabaseConnector databaseConnection) throws SQLException {
+    private String getHashedPasswordFromUsername(User user) throws SQLException {
 
         SelectQuery<Record> query = databaseConnection.getContext().selectQuery();
         Table<Record> usersTable = table("users");
@@ -59,15 +66,14 @@ public class LoginApi {
         query.addConditions(usernameField.eq(user.getUsername()));
         // Execute the query
         Result<Record> result = query.fetch();
-        databaseConnection.getDataSource().getConnection().close();
         if(result.isNotEmpty()){
             return Objects.requireNonNull(result.get(0).get(2)).toString();
         }
         return "";
     }
 
-    private boolean compareHashedPassword(User user, DatabaseConnector databaseConnection) throws SQLException {
-        String hashedPassword = getHashedPasswordFromUsername(user, databaseConnection);
+    private boolean compareHashedPassword(User user) throws SQLException {
+        String hashedPassword = getHashedPasswordFromUsername(user);
             if (hashedPassword.isEmpty()) {
                 return false;
             }
@@ -75,7 +81,7 @@ public class LoginApi {
     }
 
 
-    private Cookie createCookie(User user, DatabaseConnector databaseConnection) throws SQLException {
+    private Cookie createCookie(User user) throws SQLException {
         // Récupération de l'id du client
         SelectQuery<Record> query = databaseConnection.getContext().selectQuery();
          int userId = DatabaseUtils.getUserId(user,databaseConnection);
@@ -90,7 +96,6 @@ public class LoginApi {
             if (cookieUpdated) {
                 cookie.setValue(cookieValue);
             }
-            databaseConnection.getDataSource().getConnection().close();
         }
         return cookie;
     }

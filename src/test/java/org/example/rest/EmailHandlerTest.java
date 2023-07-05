@@ -1,7 +1,7 @@
 package org.example.rest;
 
-import mail.EmailHandler;
-import mail.EmailVerification;
+import org.example.rest.mail.EmailHandler;
+import org.example.rest.mail.EmailVerification;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 

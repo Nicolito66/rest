@@ -2,7 +2,7 @@ package org.example.rest.ApiControllers;
 
 import classes.Response;
 import classes.VerificationInfos;
-import database.DatabaseConnector;
+import org.example.rest.database.DatabaseConnector;
 import org.apache.logging.log4j.util.Strings;
 import org.jooq.*;
 import org.jooq.Record;
@@ -21,18 +21,24 @@ import static org.jooq.impl.DSL.table;
 @RequestMapping("/api")
 public class VerificationApi {
 
+    private final DatabaseConnector databaseConnection;
+
+    @Autowired
+    public VerificationApi(DatabaseConnector databaseConnector) {
+        this.databaseConnection = databaseConnector;
+    }
+
     @PutMapping("/verification")
     public ResponseEntity<Response> verification(@RequestBody VerificationInfos verificationInfos) {
-        DatabaseConnector databaseConnection = new DatabaseConnector();
         if (Strings.isNotBlank(verificationInfos.getCode()) && Strings.isNotBlank(verificationInfos.getId())) {
-            if(handleVerification(verificationInfos,databaseConnection)){
+            if(handleVerification(verificationInfos)){
                 return ResponseEntity.ok(new Response(null,200,"User has been verified"));
             }
         }
         return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new Response(null,200,"Wrong code !"));
     }
 
-    private static boolean handleVerification(VerificationInfos verificationInfos, DatabaseConnector databaseConnection) {
+    private boolean handleVerification(VerificationInfos verificationInfos) {
         SelectQuery<Record> query = databaseConnection.getContext().selectQuery();
         Table<Record> usersTable = table("users_configuration");
         Field<String> idField = field("user_id", String.class);

@@ -56,7 +56,7 @@ public class LoginApi {
     }
 
 
-    private String getHashedPasswordFromUsername(User user) throws SQLException {
+    private String getHashedPasswordFromUsername(User user) {
 
         SelectQuery<Record> query = databaseConnection.getContext().selectQuery();
         Table<Record> usersTable = table("users");
@@ -72,7 +72,7 @@ public class LoginApi {
         return "";
     }
 
-    private boolean compareHashedPassword(User user) throws SQLException {
+    private boolean compareHashedPassword(User user) {
         String hashedPassword = getHashedPasswordFromUsername(user);
             if (hashedPassword.isEmpty()) {
                 return false;
@@ -81,9 +81,8 @@ public class LoginApi {
     }
 
 
-    private Cookie createCookie(User user) throws SQLException {
+    private Cookie createCookie(User user) {
         // Récupération de l'id du client
-        SelectQuery<Record> query = databaseConnection.getContext().selectQuery();
          int userId = DatabaseUtils.getUserId(user,databaseConnection);
         String cookieName = "auth";
         String cookieValue = "";

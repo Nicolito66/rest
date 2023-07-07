@@ -11,7 +11,6 @@ import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
@@ -41,7 +40,7 @@ public class RegisterApi {
     }
 
     @PutMapping("/register")
-    public ResponseEntity<Response> register(@RequestBody User user) throws SQLException {
+    public ResponseEntity<Response> register(@RequestBody User user) {
         if (checkUserFields(user)) {
             if (!isUsernameOrEmailAlreadyTook(user, databaseConnection)) {
                 if (handleRegistration(user)) {
@@ -68,7 +67,7 @@ public class RegisterApi {
                 && EmailValidator.getInstance().isValid(user.getMail());
     }
 
-    private boolean handleRegistration(User user) throws SQLException {
+    private boolean handleRegistration(User user) {
         InsertValuesStep4<Record, Integer, String, String, String> insert = databaseConnection.getContext()
                 .insertInto(table("users"))
                 .columns(field("id", Integer.class), field("username", String.class), field("password", String.class), field("mail", String.class))
@@ -85,7 +84,7 @@ public class RegisterApi {
         return numberRowsInjected == 1 && emptyCookieInserted;
     }
 
-    private boolean isUsernameOrEmailAlreadyTook(User user, DatabaseConnector databaseConnection) throws SQLException {
+    private boolean isUsernameOrEmailAlreadyTook(User user, DatabaseConnector databaseConnection) {
         Boolean usernameExists = DatabaseUtils.checkIfUsernameExists(user,databaseConnection);
         Boolean emailExists = DatabaseUtils.checkIfEmailExists(user,databaseConnection);
         return usernameExists || emailExists;
